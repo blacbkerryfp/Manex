@@ -8,15 +8,18 @@ export default function SignIn(){
   const [loading, setLoading] = useState(false)
 
   const sendOtp = async ()=>{
-    setLoading(true)
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: window.location.origin }
-    })
-    setLoading(false)
-    if (error) { alert(error.message); return }
-    setSent(true)
-  }
+  setLoading(true);
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: {
+      // ➜ Après clic dans l'email, on revient directement sur /app
+      emailRedirectTo: `${window.location.origin}/app`,
+    },
+  });
+  setLoading(false);
+  if (error) { alert(error.message); return; }
+  setSent(true);
+};
 
   return (
     <div className="container">
