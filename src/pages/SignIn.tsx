@@ -2,6 +2,19 @@ import { useState } from 'react'
 import AuthButtons from '../components/AuthButtons'
 import { supabase } from '../lib/supabase'
 
+import { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useSession } from '../hooks/useSession'
+
+// en haut du composant
+const navigate = useNavigate();
+const session = useSession();
+
+// dès qu'on a une session, on envoie vers /app
+useEffect(()=>{
+  if (session) navigate('/app', { replace: true });
+}, [session, navigate]);
+
 export default function SignIn(){
   const [email, setEmail] = useState('')
   const [sent, setSent] = useState(false)
