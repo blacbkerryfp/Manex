@@ -3,6 +3,9 @@ import { useSession } from './hooks/useSession';
 import SignIn from './pages/SignIn';
 import Dashboard from './pages/Dashboard';
 import ManexEditor from './pages/ManexEditor';
+import Home from './pages/Home'
+...
+<Route path="/" element={<Home />} />
 
 function Home() {
   const session = useSession();
