@@ -1,70 +1,83 @@
-import { useState } from 'react'
-import AuthButtons from '../components/AuthButtons'
-import { supabase } from '../lib/supabase'
+import { useState } from 'react';
+import { supabase } from '../lib/supabase';
+import { useNavigate, useLocation } from 'react-router-dom';
 
-import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useSession } from '../hooks/useSession'
+export default function SignIn() {
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
-// en haut du composant
-const navigate = useNavigate();
-const session = useSession();
+  const redirectTo = location.state?.from?.pathname || '/app';
 
-// dès qu'on a une session, on envoie vers /app
-useEffect(()=>{
-  if (session) navigate('/app', { replace: true });
-}, [session, navigate]);
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
 
-export default function SignIn(){
-  const [email, setEmail] = useState('')
-  const [sent, setSent] = useState(false)
-  const [loading, setLoading] = useState(false)
+    const { error } = await supabase.auth.signInWithOtp({ email });
 
-  const sendOtp = async ()=>{
-  setLoading(true);
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-    options: {
-      // ➜ Après clic dans l'email, on revient directement sur /app
-      emailRedirectTo: `${window.location.origin}/app`,
-    },
-  });
-  setLoading(false);
-  if (error) { alert(error.message); return; }
-  setSent(true);
-};
+    setLoading(false);
+
+    if (error) {
+      alert(error.message);
+    } else {
+      alert("Un lien de connexion vous a été envoyé par e-mail.");
+    }
+  }
 
   return (
-    <div className="container">
-      <div className="card" style={{maxWidth: 560, margin: '8vh auto'}}>
-        <h1>Se connecter</h1>
-        <p>Par e‑mail (OTP) ou via Google/Apple.</p>
-
-        {!sent ? (
-          <>
-            <div className="row" style={{marginTop:'.8rem'}}>
-              <input
-                type="email"
-                placeholder="ton@email.com"
-                value={email}
-                onChange={e=>setEmail(e.target.value)}
-                style={{flex:1}}
-              />
-              <button onClick={sendOtp} disabled={!email || loading}>
-                {loading ? 'Envoi…' : 'Recevoir le code'}
-              </button>
-            </div>
-            <div style={{opacity:.7, fontSize:'.9rem', marginTop:'.5rem'}}>
-              Tu recevras un lien/code valable quelques minutes.
-            </div>
-
-            <div className="hr"></div>
-            <AuthButtons />
-          </>
-        ) : (
-          <p>📧 Vérifie ta boîte mail et clique sur le lien / entre le code OTP, tu seras connecté.</p>
-        )}
-      </div>
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      height: '100vh',
+      background: 'linear-gradient(135deg, #0f172a, #1e293b)',
+      color: '#fff',
+      textAlign: 'center',
+      padding: '2rem'
+    }}>
+      <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Connexion à <span style={{ color: '#a78bfa' }}>Manex</span></h1>
+      <p style={{ maxWidth: '350px', opacity: 0.8, marginBottom: '2rem' }}>
+        Entrez votre adresse e-mail pour recevoir un lien magique de connexion.
+      </p>
+      <form onSubmit={handleLogin} style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1rem',
+        width: '100%',
+        maxWidth: '320px'
+      }}>
+        <input
+          type="email"
+          placeholder="ton@email.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          style={{
+            padding: '0.8rem',
+            borderRadius: '8px',
+            border: 'none',
+            outline: 'none',
+            fontSize: '1rem'
+          }}
+        />
+        <button
+          type="submit"
+          disabled={loading}
+          style={{
+            background: '#a78bfa',
+            color: '#fff',
+            border: 'none',
+            padding: '0.8rem',
+            borderRadius: '8px',
+            fontSize: '1rem',
+            cursor: 'pointer'
+          }}
+        >
+          {loading ? 'Envoi...' : 'Recevoir le lien'}
+        </button>
+      </form>
     </div>
-  )
+  );
 }
