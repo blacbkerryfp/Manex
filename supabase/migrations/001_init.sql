@@ -1,0 +1,2 @@
+-- (Même SQL que précédemment — voir message plus haut si besoin)
+-- L'initialisation a déjà été exécutée dans ton projet Supabase.
