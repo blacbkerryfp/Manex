@@ -1,60 +1,93 @@
-import { Routes, Route, Navigate, useLocation, Link } from 'react-router-dom'
-import { useSession } from './hooks/useSession'
-import SignIn from './pages/SignIn'
-import Dashboard from './pages/Dashboard'
-import ManexEditor from './pages/ManexEditor'
-import { useEffect } from 'react'
+import { BrowserRouter as Router, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
+import { useSession } from './hooks/useSession';
+import SignIn from './pages/SignIn';
+import Dashboard from './pages/Dashboard';
+import ManexEditor from './pages/ManexEditor';
 
-/** Petite Home simple avec boutons */
 function Home() {
-  const session = useSession()
+  const session = useSession();
+
   return (
-    <div className="container">
-      <div className="card" style={{ maxWidth: 720, margin: '10vh auto', textAlign: 'center' }}>
-        <h1>Manex</h1>
-        <p>Crée, mets à jour et partage ton manuel d’exploitation en ligne.</p>
-        {session ? (
-          <Link to="/app"><button>Accéder à mon Dashboard</button></Link>
-        ) : (
-          <>
-            <div style={{ marginTop: '1rem' }}>
-              <Link to="/signin"><button>Se connecter par e‑mail</button></Link>
-            </div>
-            <div className="hr"></div>
-            <p>Ou continue avec Google/Apple depuis la page de connexion.</p>
-          </>
-        )}
-      </div>
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      height: '100vh',
+      background: 'linear-gradient(135deg, #0f172a, #1e293b)',
+      color: '#fff',
+      textAlign: 'center',
+      padding: '2rem'
+    }}>
+      <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>Bienvenue sur <span style={{ color: '#a78bfa' }}>Manex</span></h1>
+      <p style={{ maxWidth: '400px', opacity: 0.8, marginBottom: '2rem' }}>
+        Gérez facilement votre manuel d’exploitation en ligne et accédez à votre espace sécurisé.
+      </p>
+      {session ? (
+        <Link to="/app" style={{ textDecoration: 'none' }}>
+          <button style={{
+            background: '#a78bfa',
+            color: '#fff',
+            border: 'none',
+            padding: '0.8rem 1.5rem',
+            borderRadius: '8px',
+            fontSize: '1rem',
+            cursor: 'pointer'
+          }}>
+            Accéder à mon Dashboard
+          </button>
+        </Link>
+      ) : (
+        <Link to="/signin" style={{ textDecoration: 'none' }}>
+          <button style={{
+            background: '#a78bfa',
+            color: '#fff',
+            border: 'none',
+            padding: '0.8rem 1.5rem',
+            borderRadius: '8px',
+            fontSize: '1rem',
+            cursor: 'pointer'
+          }}>
+            Se connecter
+          </button>
+        </Link>
+      )}
     </div>
-  )
+  );
 }
 
-/** Garde d’auth : protège /app et l’éditeur */
 function Private({ children }: { children: JSX.Element }) {
-  const s = useSession()
-  const loc = useLocation()
-  if (s === undefined) return <div className="container">Chargement…</div>
-  return s ? children : <Navigate to="/signin" state={{ from: loc }} replace />
-}
+  const session = useSession();
+  const location = useLocation();
 
-/** Redirection douce : si on atterrit authentifié sur /signin, va sur /app */
-function SignInGuard() {
-  const s = useSession()
-  useEffect(() => {
-    // Si déjà connecté, envoie vers /app
-    if (s) window.location.replace('/app')
-  }, [s])
-  return <SignIn />
+  if (session === undefined) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        background: '#0f172a',
+        color: '#fff'
+      }}>
+        Chargement...
+      </div>
+    );
+  }
+
+  return session ? children : <Navigate to="/signin" state={{ from: location }} replace />;
 }
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/signin" element={<SignInGuard />} />
-      <Route path="/app" element={<Private><Dashboard /></Private>} />
-      <Route path="/app/m/:id" element={<Private><ManexEditor /></Private>} />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
-  )
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/app" element={<Private><Dashboard /></Private>} />
+        <Route path="/app/m/:id" element={<Private><ManexEditor /></Private>} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Router>
+  );
 }
